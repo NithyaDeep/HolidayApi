@@ -4,9 +4,9 @@ name: CI
 # This means: can't merge broken code, even via PR
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "master" ]
   pull_request:
-    branches: [ "main" ]
+    branches: [ "master" ]
 
 jobs:
   build-and-test:
