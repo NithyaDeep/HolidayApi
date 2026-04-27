@@ -1,0 +1,13 @@
+{
+  "profiles": {
+    "HolidayApi.API": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "launchUrl": "",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:60732;http://localhost:60733"
+    }
+  }
+}

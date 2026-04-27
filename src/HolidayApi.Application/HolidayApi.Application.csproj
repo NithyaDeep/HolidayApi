@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <!-- Application depends on Domain only — no EF Core, no HTTP here -->
+  <ItemGroup>
+    <ProjectReference Include="..\HolidayApi.Domain\HolidayApi.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Only Microsoft.Extensions.Logging.Abstractions — the interface, not Serilog -->
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.0" />
+  </ItemGroup>
+</Project>

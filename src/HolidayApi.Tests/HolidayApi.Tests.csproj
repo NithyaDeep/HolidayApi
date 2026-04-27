@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Reference Application + Domain directly — Infrastructure NOT referenced -->
+    <!-- This enforces that tests can only test business logic, not SQL implementation -->
+    <ProjectReference Include="..\HolidayApi.Application\HolidayApi.Application.csproj" />
+    <ProjectReference Include="..\HolidayApi.Domain\HolidayApi.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.8.0" />
+    <PackageReference Include="xunit" Version="2.6.2" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.4" />
+    <!-- NSubstitute: creates mock implementations of interfaces -->
+    <PackageReference Include="NSubstitute" Version="5.1.0" />
+  </ItemGroup>
+</Project>

@@ -1,0 +1,46 @@
+name: CI
+
+# Triggers: every push to main AND every pull request targeting main
+# This means: can't merge broken code, even via PR
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build-and-test:
+    name: Build & Test (.NET 8)
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Check out the repository code
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # 2. Install .NET 8 SDK on the runner
+      - name: Setup .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      # 3. Restore NuGet packages (cached for speed)
+      - name: Restore dependencies
+        run: dotnet restore HolidayApi.sln
+
+      # 4. Build in Release mode — catches compile errors
+      - name: Build
+        run: dotnet build HolidayApi.sln --no-restore --configuration Release
+
+      # 5. Run all unit tests
+      - name: Test
+        run: dotnet test HolidayApi.sln --no-build --configuration Release --verbosity normal --logger "trx;LogFileName=test-results.xml"
+
+      # 6. Publish test results as a GitHub Actions summary
+      - name: Publish Test Results
+        uses: dorny/test-reporter@v1
+        if: always()   # run even if tests fail
+        with:
+          name: xUnit Test Results
+          path: '**/test-results.xml'
+          reporter: dotnet-trx

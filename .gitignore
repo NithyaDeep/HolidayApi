@@ -1,0 +1,19 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+publish/
+
+## Secrets — NEVER commit these
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
+## EF Core migrations (keep these — they're versioned schema)
+# src/**/Migrations/  <-- DO NOT gitignore migrations
+
+## OS
+.DS_Store
+Thumbs.db
