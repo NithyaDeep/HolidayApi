@@ -2,7 +2,7 @@
 
 A .NET 8 Web API that fetches, stores and queries public holiday data from [Nager.Date](https://date.nager.at/Api).
 
-[![CI](https://github.com/YOUR_USERNAME/holiday-api/actions/workflows/ci.yml/badge.svg)](https://github.com/YOUR_USERNAME/holiday-api/actions/workflows/ci.yml)
+[![CI](https://github.com/NithyaDeep/HolidayApi/actions/workflows/ci.yml/badge.svg)](https://github.com/NithyaDeep/HolidayApi/actions/workflows/ci.yml)
 
 ---
 
@@ -26,8 +26,8 @@ A .NET 8 Web API that fetches, stores and queries public holiday data from [Nage
 
 **1. Clone and restore**
 ```bash
-git clone https://github.com/YOUR_USERNAME/holiday-api.git
-cd holiday-api
+git clone https://github.com/NithyaDeep/HolidayApi.git
+cd HolidayApi
 dotnet restore
 ```
 
