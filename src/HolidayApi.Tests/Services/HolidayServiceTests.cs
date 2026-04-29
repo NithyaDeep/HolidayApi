@@ -107,7 +107,7 @@ public class HolidayServiceTests
         // ACT
         var result = await _sut.GetLastCelebratedAsync("NL");
 
-        // ASSERT: mapped correctly to DTOs
+        // ASSERT
         Assert.Equal(2, result.Count);
         Assert.Equal("Good Friday",    result[0].Name);
         Assert.Equal("New Year's Day", result[1].Name);

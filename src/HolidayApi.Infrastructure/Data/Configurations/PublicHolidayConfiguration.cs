@@ -6,7 +6,6 @@ namespace HolidayApi.Infrastructure.Data.Configurations;
 
 /// <summary>
 /// Fluent API configuration for PublicHoliday.
-/// Kept separate from DbContext for Single Responsibility.
 /// The composite unique index on (Date, CountryCode) enables safe upsert.
 /// </summary>
 public class PublicHolidayConfiguration : IEntityTypeConfiguration<PublicHoliday>

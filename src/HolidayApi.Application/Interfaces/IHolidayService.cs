@@ -4,8 +4,6 @@ namespace HolidayApi.Application.Interfaces;
 
 /// <summary>
 /// Application service contract.
-/// CLEAN ARCH NOTE: The API layer depends on this interface, not the concrete service.
-/// This means we can swap the implementation (e.g. for a mock in tests) without touching controllers.
 /// </summary>
 public interface IHolidayService
 {

@@ -72,10 +72,8 @@ public sealed class HolidayService : IHolidayService
     /// <returns>A list of DTOs representing the last celebrated holidays.</returns>
     public async Task<IReadOnlyList<LastCelebratedDto>> GetLastCelebratedAsync(string countryCode, CancellationToken ct = default)
     {
-        // "Celebrated" = in the past (≤ today). The repository handles the date filter.
         var holidays = await _repository.GetLastCelebratedAsync(countryCode.ToUpperInvariant(), count: 3, ct);
 
-        // Map domain entities → response DTOs
         return holidays
             .Select(h => new LastCelebratedDto(h.Date, h.Name))
             .ToList();
@@ -98,7 +96,7 @@ public sealed class HolidayService : IHolidayService
 
         return results
             .Select(r => new WeekdayCountDto(r.CountryCode, r.Count))
-            .OrderByDescending(r => r.WeekdayHolidayCount)  // ← add this line
+            .OrderByDescending(r => r.WeekdayHolidayCount)
             .ToList();
     }
 

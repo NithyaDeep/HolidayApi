@@ -10,7 +10,6 @@ public interface INagerApiClient
 
 /// <summary>
 /// Maps 1:1 to the Nager.Date API JSON response.
-/// Kept in Application because the service needs to understand what the API returns.
 /// </summary>
 public record NagerHolidayDto(
     string Date,
