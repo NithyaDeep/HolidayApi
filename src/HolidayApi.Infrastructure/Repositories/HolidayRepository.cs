@@ -7,17 +7,6 @@ namespace HolidayApi.Infrastructure.Repositories;
 
 /// <summary>
 /// Concrete EF Core implementation of IHolidayRepository.
-///
-/// CLEAN ARCH NOTE:
-///   - This class lives in Infrastructure — the outermost layer
-///   - It implements an interface defined in Domain
-///   - HolidayService never knows this class exists; it only sees IHolidayRepository
-///   - In tests, we replace this entire class with a mock or in-memory fake
-///
-/// PERFORMANCE NOTES:
-///   - All queries filter and aggregate in SQL, not in C# memory
-///   - Batch upsert avoids N+1 insert loops
-///   - AsNoTracking() used on read-only queries (faster, no change tracking overhead)
 /// </summary>
 public sealed class HolidayRepository : IHolidayRepository
 {
