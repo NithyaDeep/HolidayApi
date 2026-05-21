@@ -21,7 +21,6 @@ public class HolidayServiceTests
     {
         _mockRepo      = Substitute.For<IHolidayRepository>();
         _mockApiClient = Substitute.For<INagerApiClient>();
-
         
         _sut = new HolidayService(
             _mockRepo,

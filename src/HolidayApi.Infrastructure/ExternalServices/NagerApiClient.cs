@@ -29,6 +29,7 @@ public sealed class NagerApiClient : INagerApiClient
         if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
         {
             _logger.LogWarning("No holidays found for {Country}/{Year} — country may not be supported.", countryCode, year);
+
             return Array.Empty<NagerHolidayDto>();
         }
 
@@ -40,6 +41,7 @@ public sealed class NagerApiClient : INagerApiClient
         {
             _logger.LogWarning("Empty response body for {CountryCode}/{Year} — country not supported by Nager API.",
                 countryCode, year);
+
             return Array.Empty<NagerHolidayDto>();
         }
 

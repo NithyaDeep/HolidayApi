@@ -16,33 +16,64 @@ public sealed class HolidaysController : ControllerBase
 
     public HolidaysController(IHolidayService holidayService) => _holidayService = holidayService;
 
-    // POST /api/holidays/fetch
+    private const string InvalidYearMessage =
+       "Year must be between 1900 and 2100.";
+
+    private const string InvalidCountryMessage =
+        "countryCode must be a valid 2-letter ISO 3166-1 alpha-2 code (e.g. NL, BE).";
+
+    private const string InvalidTwoCountriesMessage =
+        "Both country codes must be valid 2-letter ISO 3166-1 alpha-2 codes (e.g. NL, BE).";
+
+    private const string SameCountryMessage =
+        "countryCodeA and countryCodeB must be different.";
+    private bool IsInvalidYear(int year)
+        => year < 1900 || year > 2100;
+
+    private string? NormalizeCountry(string? code)
+    {
+        if (string.IsNullOrWhiteSpace(code))
+        {
+            return null;
+        }
+
+        var normalized = code.Trim().ToUpperInvariant();
+
+        return normalized.Length == 2 
+            ? normalized 
+            : null;
+    }
+
+    // GET /api/holidays/fetch
     /// <summary>
     /// Fetches public holidays from the Nager.Date API and saves them to the database.
     /// </summary>
-    [HttpPost("fetch")]
+    [HttpGet("fetch")]
     [ProducesResponseType(typeof(FetchResultDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> Fetch(
-        [FromQuery] int year,
-        [FromQuery] string countryCode,
-        CancellationToken ct)
+    public async Task<IActionResult> Fetch([FromQuery] int year, [FromQuery] string countryCode, CancellationToken ct)
     {
-        if (year < 1900 || year > 2100)
-            return BadRequest("Year must be between 1900 and 2100.");
+        if (IsInvalidYear(year))
+        {
+            return BadRequest(InvalidYearMessage);
+        }
+        var code = NormalizeCountry(countryCode);
+        if (code is null)
+        {
+            return BadRequest(InvalidCountryMessage);
+        }
 
-        if (string.IsNullOrWhiteSpace(countryCode) || countryCode.Length != 2)
-            return BadRequest("countryCode must be a 2-character ISO 3166-1 alpha-2 code (e.g. NL, BE).");
-
-        var result = await _holidayService.FetchAndSaveAsync(year, countryCode, ct);
+        var result = await _holidayService.FetchAndSaveAsync(year, code, ct);
 
         if (result.RecordsSaved == 0 && !result.WasCached)
+        {
             return BadRequest(new
             {
                 message = $"No holiday data found for country code '{countryCode}'. " +
                           $"This country may not be supported by the Nager.Date API. " +
                           $"Check supported countries at: https://date.nager.at/api/v3/AvailableCountries"
             });
+        }
 
         return Ok(result);
     }
@@ -54,14 +85,17 @@ public sealed class HolidaysController : ControllerBase
     /// </summary>
     [HttpGet("last-celebrated")]
     [ProducesResponseType(typeof(IReadOnlyList<LastCelebratedDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> LastCelebrated(
-        [FromQuery] string countryCode,
+    public async Task<IActionResult> LastCelebrated([FromQuery] string countryCode,
         CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(countryCode) || countryCode.Length != 2)
-            return BadRequest("countryCode must be a 2-character ISO code.");
+        var code = NormalizeCountry(countryCode);
+        if (code is null)
+        {
+            return BadRequest(InvalidCountryMessage);
+        }
 
-        var result = await _holidayService.GetLastCelebratedAsync(countryCode, ct);
+        var result = await _holidayService.GetLastCelebratedAsync(code, ct);
+
         return Ok(result);
     }
 
@@ -73,16 +107,32 @@ public sealed class HolidaysController : ControllerBase
     /// </summary>
     [HttpGet("weekday-counts")]
     [ProducesResponseType(typeof(IReadOnlyList<WeekdayCountDto>), StatusCodes.Status200OK)]
-    public async Task<IActionResult> WeekdayCounts(
-        [FromQuery] int year,
-        [FromQuery] IEnumerable<string> countryCodes,
+    public async Task<IActionResult> WeekdayCounts([FromQuery] int year, [FromQuery] IEnumerable<string> countryCodes,
         CancellationToken ct)
     {
-        var codes = countryCodes.ToList();
+        if (IsInvalidYear(year))
+        {
+            return BadRequest(InvalidYearMessage);
+        }
+
+        var codes = countryCodes
+            .Where(c => !string.IsNullOrWhiteSpace(c))
+            .Select(c => c.Trim().ToUpperInvariant())
+            .Distinct()
+            .ToList();
+
         if (codes.Count == 0)
+        {
             return BadRequest("At least one countryCode is required.");
+        }
+
+        if (codes.Any(c => c.Length != 2))
+        {
+            return BadRequest(InvalidCountryMessage);
+        }
 
         var result = await _holidayService.GetWeekdayHolidayCountsAsync(year, codes, ct);
+
         return Ok(result);
     }
 
@@ -100,17 +150,24 @@ public sealed class HolidaysController : ControllerBase
         [FromQuery] string countryCodeB,
         CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(countryCodeA) || string.IsNullOrWhiteSpace(countryCodeB))
+        if (IsInvalidYear(year))
         {
-            return BadRequest("Both countryCodeA and countryCodeB are required.");
-        } 
-
-        if (countryCodeA.ToUpperInvariant() == countryCodeB.ToUpperInvariant())
-        {
-            return BadRequest("countryCodeA and countryCodeB must be different.");
+            return BadRequest(InvalidYearMessage);
         }
-            
-        var result = await _holidayService.GetSharedHolidaysAsync(year, countryCodeA, countryCodeB, ct);
+        var codeA = NormalizeCountry(countryCodeA);
+        var codeB = NormalizeCountry(countryCodeB);
+
+        if (codeA is null || codeB is null)
+        {
+            return BadRequest(InvalidTwoCountriesMessage);
+        }
+
+        if (codeA == codeB)
+        {
+            return BadRequest(SameCountryMessage);
+        }
+
+        var result = await _holidayService.GetSharedHolidaysAsync(year, codeA, codeB, ct);
 
         return Ok(result);
     }

@@ -29,10 +29,9 @@ public class PublicHoliday
         bool isGlobal,
         IEnumerable<string>? types)
     {
-        if (string.IsNullOrWhiteSpace(countryCode) || countryCode.Length != 2)
-            throw new ArgumentException("CountryCode must be a 2-character ISO code.", nameof(countryCode));
-
-        return new PublicHoliday
+        return string.IsNullOrWhiteSpace(countryCode) || countryCode.Length != 2
+            ? throw new ArgumentException("CountryCode must be a 2-character ISO code.", nameof(countryCode))
+            : new PublicHoliday
         {
             Date        = date,
             LocalName   = localName ?? string.Empty,
@@ -49,7 +48,8 @@ public class PublicHoliday
     /// </summary>
     public bool IsWeekday()
     {
-        var dow = Date.DayOfWeek;
-        return dow != DayOfWeek.Saturday && dow != DayOfWeek.Sunday;
+        var dayOfWeek = Date.DayOfWeek;
+
+        return dayOfWeek != DayOfWeek.Saturday && dayOfWeek != DayOfWeek.Sunday;
     }
 }

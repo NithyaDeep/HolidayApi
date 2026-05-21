@@ -14,11 +14,13 @@ public sealed class HolidayRepository : IHolidayRepository
 
     public HolidayRepository(AppDbContext db) => _appDb = db;
 
-
     public async Task UpsertBatchAsync(IEnumerable<PublicHoliday> holidays, CancellationToken ct = default)
     {
         var holidayList = holidays.ToList();
-        if (holidayList.Count == 0) return;
+        if (holidayList.Count == 0)
+        {
+            return;
+        }
 
         var countryCode = holidayList.First().CountryCode;
 

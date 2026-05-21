@@ -42,9 +42,13 @@ public sealed class ExceptionMiddleware
 
         // Log with full stack trace for server errors, brief message for client errors
         if (statusCode == HttpStatusCode.InternalServerError)
+        {
             _logger.LogError(exception, "Unhandled exception on {Method} {Path}", context.Request.Method, context.Request.Path);
+        }
         else
+        {
             _logger.LogWarning("Client error {Status}: {Message}", (int)statusCode, exception.Message);
+        }
 
         var problem = new ProblemDetails
         {

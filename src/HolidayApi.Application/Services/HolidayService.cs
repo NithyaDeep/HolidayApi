@@ -15,10 +15,7 @@ public sealed class HolidayService : IHolidayService
     private readonly INagerApiClient _apiClient;
     private readonly ILogger<HolidayService> _logger;
 
-    public HolidayService(
-        IHolidayRepository repository,
-        INagerApiClient apiClient,
-        ILogger<HolidayService> logger)
+    public HolidayService(IHolidayRepository repository, INagerApiClient apiClient, ILogger<HolidayService> logger)
     {
         _repository = repository;
         _apiClient  = apiClient;
@@ -34,18 +31,16 @@ public sealed class HolidayService : IHolidayService
     /// <returns>A DTO containing the fetch result.</returns>
     public async Task<FetchResultDto> FetchAndSaveAsync(int year, string countryCode, CancellationToken ct = default)
     {
-        var code = countryCode.ToUpperInvariant();
-
         // Check cache first — avoid hammering external API on repeat calls
-        if (await _repository.ExistsAsync(year, code, ct))
+        if (await _repository.ExistsAsync(year, countryCode, ct))
         {
-            _logger.LogInformation("Holiday data for {Country}/{Year} already in DB — skipping fetch.", code, year);
-            return new FetchResultDto(code, year, 0, WasCached: true);
+            _logger.LogInformation("Holiday data for {Country}/{Year} already in DB — skipping fetch.", countryCode, year);
+
+            return new FetchResultDto(countryCode, year, 0, WasCached: true);
         }
 
-        _logger.LogInformation("Fetching holidays for {Country}/{Year} from Nager API.", code, year);
-        var apiData = await _apiClient.GetPublicHolidaysAsync(year, code, ct);
-
+        _logger.LogInformation("Fetching holidays for {Country}/{Year} from Nager API.", countryCode, year);
+        var apiData = await _apiClient.GetPublicHolidaysAsync(year, countryCode, ct);
         // Map API DTOs → Domain Entities using the factory method
         // The factory enforces invariants (e.g. CountryCode must be 2 chars)
         var entities = apiData
@@ -60,8 +55,9 @@ public sealed class HolidayService : IHolidayService
 
         await _repository.UpsertBatchAsync(entities, ct);
 
-        _logger.LogInformation("Saved {Count} holidays for {Country}/{Year}.", entities.Count, code, year);
-        return new FetchResultDto(code, year, entities.Count, WasCached: false);
+        _logger.LogInformation("Saved {Count} holidays for {Country}/{Year}.", entities.Count, countryCode, year);
+
+        return new FetchResultDto(countryCode, year, entities.Count, WasCached: false);
     }
 
     /// <summary>
@@ -72,7 +68,7 @@ public sealed class HolidayService : IHolidayService
     /// <returns>A list of DTOs representing the last celebrated holidays.</returns>
     public async Task<IReadOnlyList<LastCelebratedDto>> GetLastCelebratedAsync(string countryCode, CancellationToken ct = default)
     {
-        var holidays = await _repository.GetLastCelebratedAsync(countryCode.ToUpperInvariant(), count: 3, ct);
+        var holidays = await _repository.GetLastCelebratedAsync(countryCode, count: 3, ct);
 
         return holidays
             .Select(h => new LastCelebratedDto(h.Date, h.Name))
@@ -89,10 +85,8 @@ public sealed class HolidayService : IHolidayService
     public async Task<IReadOnlyList<WeekdayCountDto>> GetWeekdayHolidayCountsAsync(
         int year, IEnumerable<string> countryCodes, CancellationToken ct = default)
     {
-        var codes = countryCodes.Select(c => c.ToUpperInvariant()).Distinct().ToList();
-
         // The repository performs the grouping + counting in SQL (not in memory)
-        var results = await _repository.GetWeekdayHolidayCountsAsync(year, codes, ct);
+        var results = await _repository.GetWeekdayHolidayCountsAsync(year, countryCodes, ct);
 
         return results
             .Select(r => new WeekdayCountDto(r.CountryCode, r.Count))
@@ -112,14 +106,8 @@ public sealed class HolidayService : IHolidayService
     public async Task<IReadOnlyList<SharedHolidayDto>> GetSharedHolidaysAsync(
         int year, string countryCodeA, string countryCodeB, CancellationToken ct = default)
     {
-        var codeA = countryCodeA.ToUpperInvariant();
-        var codeB = countryCodeB.ToUpperInvariant();
-
-        if (codeA == codeB)
-            throw new ArgumentException("Country codes must be different.");
-
         
-        var shared = await _repository.GetSharedHolidaysAsync(year, codeA, codeB, ct);
+        var shared = await _repository.GetSharedHolidaysAsync(year, countryCodeA, countryCodeB, ct);
 
         return shared
             .Select(s => new SharedHolidayDto(s.Date, s.LocalNameA, s.LocalNameB))
