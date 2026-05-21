@@ -31,6 +31,8 @@ public sealed class HolidayService : IHolidayService
     /// <returns>A DTO containing the fetch result.</returns>
     public async Task<FetchResultDto> FetchAndSaveAsync(int year, string countryCode, CancellationToken ct = default)
     {
+        countryCode = countryCode.Trim().ToUpperInvariant();
+
         // Check cache first — avoid hammering external API on repeat calls
         if (await _repository.ExistsAsync(year, countryCode, ct))
         {

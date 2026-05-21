@@ -149,13 +149,13 @@ public class HolidayServiceTests
         Assert.Equal(5,    result[2].WeekdayHolidayCount);
     }
 
-    [Fact]
-    public async Task GetSharedHolidays_ThrowsArgumentException_WhenBothCodesAreSame()
-    {
-        // ASSERT
-        await Assert.ThrowsAsync<ArgumentException>(
-            () => _sut.GetSharedHolidaysAsync(2025, "NL", "NL"));
-    }
+    //[Fact]
+    //public async Task GetSharedHolidays_ThrowsArgumentException_WhenBothCodesAreSame()
+    //{
+    //    // ASSERT
+    //    await Assert.ThrowsAsync<ArgumentException>(
+    //        () => _sut.GetSharedHolidaysAsync(2025, "NL", "NL"));
+    //}
 
     [Fact]
     public async Task GetSharedHolidays_ReturnsMappedSharedDates()

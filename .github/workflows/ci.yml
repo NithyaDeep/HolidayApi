@@ -1,14 +1,11 @@
 name: CI
 
-# Triggers: every push to main AND every pull request targeting main
+# Triggers: every push to master AND every pull request targeting master
 on:
   push:
     branches: [ "master" ]
   pull_request:
     branches: [ "master" ]
-
-env:
-  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
 jobs:
   build-and-test:
