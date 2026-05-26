@@ -86,7 +86,6 @@ public sealed class HolidayRepository : IHolidayRepository
             .Where(h => h.Date.DayOfWeek != DayOfWeek.Saturday && h.Date.DayOfWeek != DayOfWeek.Sunday)
             .GroupBy(h => h.CountryCode)
             .Select(g => (CountryCode: g.Key, Count: g.Count()))
-            .OrderByDescending(r => r.Count)
             .ToList();
     }
 
